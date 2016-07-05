@@ -37,43 +37,43 @@ bool ConfigFile::valueExists(const std::string &name) {
 	return false;
 }
 
-std::string ConfigFile::getValueString(const std::string &name) {
+std::pair<std::string, bool> ConfigFile::getValueString(const std::string &name) {
 	for (size_t index = 0; index < m_names.size(); ++index) {
 		if (name == m_names[index]) {
-			return m_values[index];
+			return std::make_pair(m_values[index], true);
 		}
 	}
-	return 0;
+	return std::make_pair("", false);
 }
 
-bool ConfigFile::getValueBool(const std::string &name) {
+std::pair<bool, bool> ConfigFile::getValueBool(const std::string &name) {
 	for (size_t index = 0; index < m_names.size(); ++index) {
 		if (name == m_names[index]) {
 			std::transform(m_values[index].begin(), m_values[index].end(), m_values[index].begin(), ::tolower);
 			if (m_values[index] == "true" || m_values[index] == "1") {
-				return true;
+				return std::make_pair(true, true);
 			}
 		}
 	}
-	return false;
+	return std::make_pair(false, false);
 }
 
-int ConfigFile::getValueInt(const std::string &name) {
+std::pair<int, bool> ConfigFile::getValueInt(const std::string &name) {
 	for (size_t index = 0; index < m_names.size(); ++index) {
 		if (name == m_names[index]) {
-			return atoi(m_values[index].c_str());
+			return std::make_pair(atoi(m_values[index].c_str()), true);
 		}
 	}
-	return 0;
+	return std::make_pair(0, false);
 }
 
-float ConfigFile::getValueFloat(const std::string &name) {
+std::pair<float, bool> ConfigFile::getValueFloat(const std::string &name) {
 	for (size_t index = 0; index < m_names.size(); ++index) {
 		if (name == m_names[index]) {
-			return static_cast<float>(atof(m_values[index].c_str()));
+			return std::make_pair(static_cast<float>(atof(m_values[index].c_str())), true);
 		}
 	}
-	return 0;
+	return std::make_pair(0, false);
 }
 
 ConfigFile::~ConfigFile() {

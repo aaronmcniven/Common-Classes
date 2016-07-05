@@ -18,10 +18,10 @@ public:
 	bool load(const std::string &filename);
 	std::string getLocation();
 	bool valueExists(const std::string &name);
-    std::pair<std::string, bool> getValueString(const std::string &name);
-    std::pair<bool, bool> getValueBool(const std::string &name);
-    std::pair<int, bool> getValueInt(const std::string &name);
-    std::pair<float, bool> getValueFloat(const std::string &name);
+    	std::pair<std::string, bool> getValueString(const std::string &name);
+    	std::pair<bool, bool> getValueBool(const std::string &name);
+    	std::pair<int, bool> getValueInt(const std::string &name);
+    	std::pair<float, bool> getValueFloat(const std::string &name);
 	~ConfigFile();
 };
 

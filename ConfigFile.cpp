@@ -10,73 +10,80 @@ ConfigFile::ConfigFile(const std::string &filename) {
 }
 
 bool ConfigFile::load(const std::string &filename) {
-	file.open(filename);
+	m_loaded = false;
+	std::ifstream file(filename);
 	if (file.is_open()) {
 		std::string line;
 		while (std::getline(file, line)) {
-			int delimiter = line.find('=');
-			m_names.push_back(line.substr(0, delimiter));
-			m_values.push_back(line.substr(delimiter + 1, line.size()));
+			auto delimiter = line.find('=');
+			if (delimiter == std::string::npos) {
+				return false;
+			}
+			m_values[line.substr(0, delimiter)] = line.substr(delimiter + 1, line.size());
 		}
 		m_location = filename.substr(0, filename.rfind('/') + 1);
+		m_loaded = true;
 		return true;
 	}
 	return false;
 }
 
-std::string ConfigFile::getLocation() {
+bool ConfigFile::loaded() {
+	return m_loaded;
+}
+
+const std::string &ConfigFile::getLocation() {
 	return m_location;
 }
 
 bool ConfigFile::valueExists(const std::string &name) {
-	for (size_t index = 0; index < m_names.size(); ++index) {
-		if (name == m_names[index]) {
-			return true;
-		}
-	}
-	return false;
+	return m_values.find(name) != m_values.end();
 }
 
 std::pair<std::string, bool> ConfigFile::getValueString(const std::string &name) {
-	for (size_t index = 0; index < m_names.size(); ++index) {
-		if (name == m_names[index]) {
-			return std::make_pair(m_values[index], true);
-		}
+	if (valueExists(name)) {
+		return std::make_pair(m_values[name], true);
 	}
 	return std::make_pair("", false);
 }
 
 std::pair<bool, bool> ConfigFile::getValueBool(const std::string &name) {
-	for (size_t index = 0; index < m_names.size(); ++index) {
-		if (name == m_names[index]) {
-			std::transform(m_values[index].begin(), m_values[index].end(), m_values[index].begin(), ::tolower);
-			if (m_values[index] == "true" || m_values[index] == "1") {
-				return std::make_pair(true, true);
-			}
+	if (valueExists(name)) {
+		std::string value = m_values[name];
+		std::transform(value.begin(), value.end(), value.begin(), ::tolower);
+		if (m_values[name] == "true" || m_values[name] == "1") {
+			return std::make_pair(true, true);
+		}
+		else if (m_values[name] == "false" || m_values[name] == "0") {
+			return std::make_pair(false, true);
 		}
 	}
 	return std::make_pair(false, false);
 }
 
 std::pair<int, bool> ConfigFile::getValueInt(const std::string &name) {
-	for (size_t index = 0; index < m_names.size(); ++index) {
-		if (name == m_names[index]) {
-			return std::make_pair(atoi(m_values[index].c_str()), true);
+	if (valueExists(name)) {
+		try {
+			return std::make_pair(std::stoi(m_values[name]), true);
+		}
+		catch(...) {
+			MessageBoxA(NULL, "Invalid argument (ConfigFile::getValueInt)", "Something bad happened.", MB_OK | MB_ICONERROR);
 		}
 	}
 	return std::make_pair(0, false);
 }
 
 std::pair<float, bool> ConfigFile::getValueFloat(const std::string &name) {
-	for (size_t index = 0; index < m_names.size(); ++index) {
-		if (name == m_names[index]) {
-			return std::make_pair(static_cast<float>(atof(m_values[index].c_str())), true);
+	if (valueExists(name)) {
+		try {
+			return std::make_pair(std::stof(m_values[name]), true);
+		} catch(...) {
+			MessageBoxA(NULL, "Invalid argument (ConfigFile::getValueFloat)", "Something bad happened.", MB_OK | MB_ICONERROR);
 		}
 	}
-	return std::make_pair(0, false);
+	return std::make_pair(0.0f, false);
 }
 
 ConfigFile::~ConfigFile() {
-	m_names.clear();
-	m_values.clear();
+
 }
